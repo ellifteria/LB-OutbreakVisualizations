@@ -1,0 +1,24 @@
+# Run as: iex --dot-iex path/to/notebook.exs
+
+# Title: Disease Outbreak Visualizations
+
+Mix.install([
+  {:vega_lite, "~> 0.1.6"},
+  {:kino_vega_lite, "~> 0.1.7"}
+])
+
+alias VegaLite, as: Vl
+
+# ── Quantifying Outbreaks ──
+
+source =
+  "https://gist.githubusercontent.com/ellifteria/309fff69d98d1dabb7ef64f4c93798e6/raw/5617b9272597cab90621ff231383a1d6c49691b8/Outbreaks.csv"
+
+Vl.new(height: 400, width: 600, title: "Number of Reported Outbreaks by Country")
+|> Vl.data_from_url(source)
+|> Vl.transform(aggregate: [[op: :count, as: "num_outbreaks"]], groupby: ["Country"])
+|> Vl.transform(filter: "datum.num_outbreaks >= 20")
+|> Vl.mark(:bar)
+|> Vl.encode_field(:x, "Country", type: :nominal, sort: :"-y")
+|> Vl.encode_field(:y, "num_outbreaks", type: :quantitative, title: "Number of Outbreaks")
+|> Vl.config(view: [stroke: nil])
